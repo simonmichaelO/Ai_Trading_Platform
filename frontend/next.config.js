@@ -1,20 +1,29 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable React strict mode for better development warnings
   reactStrictMode: true,
 
-  // Proxy API requests to backend during development
-  // This avoids CORS issues and makes the API feel like same-origin
   async rewrites() {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    
+    // Only add rewrite if API URL is configured
+    if (apiUrl && (apiUrl.startsWith('http://') || apiUrl.startsWith('https://'))) {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${apiUrl}/api/:path*`,
+        },
+      ];
+    }
+
+    // Default: proxy to localhost for development
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/:path*`,
+        destination: 'http://localhost:5000/api/:path*',
       },
     ];
   },
 
-  // Optimize images from these domains
   images: {
     remotePatterns: [
       {
