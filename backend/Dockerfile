@@ -39,7 +39,7 @@ RUN addgroup -g 1001 -S appgroup && \
 
 # Copy package files and install production dependencies only
 COPY package.json package-lock.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm install --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
