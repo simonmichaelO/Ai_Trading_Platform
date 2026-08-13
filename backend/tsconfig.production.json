@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./dist",
+    "paths": {
+      "@config/*": ["config/*"],
+      "@controllers/*": ["controllers/*"],
+      "@services/*": ["services/*"],
+      "@middleware/*": ["middleware/*"],
+      "@routes/*": ["routes/*"],
+      "@repositories/*": ["repositories/*"],
+      "@lib/*": ["lib/*"],
+      "@models/*": ["types/*"],
+      "@utils/*": ["utils/*"]
+    }
+  }
+}
