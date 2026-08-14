@@ -11,5 +11,6 @@ COPY package.json package-lock.json ./
 RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/tsconfig.production.json ./tsconfig.json
+COPY --from=builder /app/bootstrap.js ./bootstrap.js
 EXPOSE 5000
 CMD ["node", "-r", "./bootstrap.js", "-r", "tsconfig-paths/register", "dist/server.js"]
