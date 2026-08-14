@@ -12,4 +12,4 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/tsconfig.production.json ./tsconfig.json
 EXPOSE 5000
-CMD ["node", "-r", "tsconfig-paths/register", "dist/server.js"]
+CMD ["node", "-r", "./bootstrap.js", "-r", "tsconfig-paths/register", "dist/server.js"]
