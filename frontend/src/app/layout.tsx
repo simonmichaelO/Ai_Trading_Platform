@@ -29,6 +29,9 @@ export const metadata: Metadata = {
   title: 'AI Trading Platform',
   description: 'Professional AI-powered trading analysis platform',
   keywords: ['trading', 'AI', 'analysis', 'forex', 'crypto', 'stocks'],
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
