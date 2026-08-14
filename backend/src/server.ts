@@ -31,7 +31,7 @@ import tradeRoutes from './routes/trade.routes';
 const app: Application = express();
 
 // Trust Railway/Vercel proxy (required for rate limiting to work behind proxies)
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // ──────────────────────────────────────────────
 // SECURITY MIDDLEWARE
