@@ -49,27 +49,39 @@ export async function runAnalysis(input: CreateAnalysisInput) {
   logger.info('Running analysis', { userId, symbol, timeframe, provider, analysisType });
 
   // 1. Get market data
-  let marketSnapshot;
+    let marketSnapshot;
   try {
     const priceData = await getPrice(symbol);
-    const candleData = await getCandles(symbol, timeframe as any, 50);
+
+    // Try to get candles, but make it non-fatal
+    let candles = [];
+    try {
+      const candleData = await getCandles(symbol, timeframe as any, 50);
+      candles = candleData.candles || [];
+    } catch (candleError) {
+      logger.warn('Candle fetch failed, using price-only snapshot', {
+        symbol,
+        error: candleError.message || 'Unknown',
+      });
+    }
 
     marketSnapshot = {
       symbol,
       timeframe,
       price: {
-        open: candleData.candles[candleData.candles.length - 1]?.open || priceData.price,
+        open: candles[candles.length - 1]?.open || priceData.price,
         high: priceData.high_24h,
         low: priceData.low_24h,
         close: priceData.price,
       },
-      candles: candleData.candles,
+      candles,
       volume: priceData.volume_24h,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    logger.error('Failed to fetch market data', { symbol, error });
-    throw new Error(`Failed to fetch market data for ${symbol}. Check that the symbol is valid.`);
+    const errMsg = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Failed to fetch market data', { symbol, error: errMsg });
+    throw new Error(`Failed to fetch market data for ${symbol}: ${errMsg}`);
   }
 
   // 2. Get strategy (if specified)
