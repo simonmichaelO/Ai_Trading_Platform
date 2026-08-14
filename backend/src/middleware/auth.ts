@@ -49,6 +49,8 @@ export interface AuthenticatedRequest extends Request {
  * verifying user tokens — not performing admin operations.
  * This follows the principle of least privilege.
  */
+const ws = require('ws');
+
 const supabaseAuth = createClient(
   config.supabase.url || 'https://placeholder.supabase.co',
   config.supabase.anonKey || 'placeholder',
@@ -56,6 +58,11 @@ const supabaseAuth = createClient(
     auth: {
       autoRefreshToken: false,
       persistSession: false,
+    },
+    realtime: {
+      params: {
+        transport: ws,
+      },
     },
   }
 );
