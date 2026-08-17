@@ -15,6 +15,8 @@ import { AIProvider as AIProviderInterface, AIAnalysisRequest, AIAnalysisRespons
 import { OpenAIProvider } from './openai.provider';
 import { AnthropicProvider } from './anthropic.provider';
 import { GeminiProvider } from './gemini.provider';
+import { TogetherAIProvider } from './together.provider';
+import { OpenRouterProvider } from './openrouter.provider';
 import { buildSystemPrompt, buildUserPrompt } from './prompts';
 import { logger } from '@utils/logger';
 import type { MarketSnapshot, AIProvider, AnalysisType } from '@models/index';
@@ -27,6 +29,8 @@ const providers: AIProviderInterface[] = [
   new OpenAIProvider(),
   new AnthropicProvider(),
   new GeminiProvider(),
+  new TogetherAIProvider(),
+  new OpenRouterProvider(),
 ];
 
 /**
@@ -174,3 +178,5 @@ export function getAvailableProviders(): Array<{
 export function hasAnyProvider(): boolean {
   return providers.some(p => p.isAvailable());
 }
+
+
