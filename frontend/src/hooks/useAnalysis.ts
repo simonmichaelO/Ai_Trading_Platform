@@ -73,11 +73,8 @@ export interface AnalysisListItem {
 }
 
 export interface AIProviderInfo {
-  id: string;
-  name: string;
-  available: boolean;
-  models: string[];
-  supportsVision: boolean;
+id: 'openai' | 'anthropic' | 'gemini' | 'together' | 'openrouter';
+name: string;
 }
 
 export interface CreateAnalysisInput {
