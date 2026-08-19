@@ -19,7 +19,7 @@ export type MarketType = 'forex' | 'crypto' | 'stocks' | 'indices' | 'commoditie
 export type Direction = 'long' | 'short' | 'neutral';
 export type TradeStatus = 'open' | 'closed' | 'cancelled';
 export type TradeOutcome = 'win' | 'loss' | 'breakeven';
-export type AIProvider = 'openai' | 'anthropic' | 'gemini';
+export type AIProvider = 'openai' | 'anthropic' | 'gemini' | 'together' | 'openrouter';
 export type AnalysisType = 'data' | 'vision' | 'hybrid';
 export type EmotionalState = 'confident' | 'neutral' | 'fearful' | 'greedy' | 'anxious' | 'frustrated';
 
