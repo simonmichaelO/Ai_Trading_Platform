@@ -1,16 +1,3 @@
-/**
- * AI Service
- * 
- * Central service that orchestrates AI analysis requests.
- * Routes to the appropriate provider based on user preference.
- * 
- * Flow:
- *   1. Receive analysis request (market data + strategy + provider preference)
- *   2. Build prompts (system + user)
- *   3. Route to selected provider
- *   4. Parse and return structured output
- */
-
 import { AIProvider as AIProviderInterface, AIAnalysisRequest, AIAnalysisResponse } from './ai-provider';
 import { OpenAIProvider } from './openai.provider';
 import { AnthropicProvider } from './anthropic.provider';
@@ -21,10 +8,6 @@ import { buildSystemPrompt, buildUserPrompt } from './prompts';
 import { logger } from '@utils/logger';
 import type { MarketSnapshot, AIProvider, AnalysisType } from '@models/index';
 
-// ──────────────────────────────────────────────
-// Provider Registry
-// ──────────────────────────────────────────────
-
 const providers: AIProviderInterface[] = [
   new OpenAIProvider(),
   new AnthropicProvider(),
@@ -33,18 +16,12 @@ const providers: AIProviderInterface[] = [
   new OpenRouterProvider(),
 ];
 
-/**
- * Get a provider by its ID.
- * Falls back to first available if requested provider is unavailable.
- */
 function getProvider(requestedProvider: AIProvider): AIProviderInterface {
-  // Try requested provider first
   const requested = providers.find(p => p.providerId === requestedProvider);
   if (requested && requested.isAvailable()) {
     return requested;
   }
 
-  // Fall back to first available
   const available = providers.find(p => p.isAvailable());
   if (available) {
     logger.warn(`Provider ${requestedProvider} unavailable, falling back to ${available.name}`, {
@@ -58,13 +35,11 @@ function getProvider(requestedProvider: AIProvider): AIProviderInterface {
     'No AI provider is configured. Add at least one API key to backend/.env:\n' +
     '  OPENAI_API_KEY — https://platform.openai.com/api-keys\n' +
     '  ANTHROPIC_API_KEY — https://console.anthropic.com/\n' +
-    '  GEMINI_API_KEY — https://makersuite.google.com/app/apikey'
+    '  GEMINI_API_KEY — https://makersuite.google.com/app/apikey\n' +
+    '  TOGETHER_API_KEY — https://api.together.ai/\n' +
+    '  OPENROUTER_API_KEY — https://openrouter.ai/keys'
   );
 }
-
-// ──────────────────────────────────────────────
-// Analysis Request Type
-// ──────────────────────────────────────────────
 
 export interface AnalysisRequest {
   symbol: string;
@@ -84,13 +59,6 @@ export interface AnalysisRequest {
   };
 }
 
-// ──────────────────────────────────────────────
-// Main Analysis Function
-// ──────────────────────────────────────────────
-
-/**
- * Perform an AI analysis with the specified provider.
- */
 export async function performAnalysis(request: AnalysisRequest): Promise<{
   response: AIAnalysisResponse;
   providerUsed: string;
@@ -105,22 +73,10 @@ export async function performAnalysis(request: AnalysisRequest): Promise<{
     analysisType: request.analysisType,
   });
 
-  // Build prompts
   const includeVision = request.analysisType !== 'data' && !!request.chartImage;
-  const systemPrompt = buildSystemPrompt(
-    request.provider,
-    request.strategy,
-    includeVision
-  );
+  const systemPrompt = buildSystemPrompt(request.provider, request.strategy, includeVision);
+  const userPrompt = buildUserPrompt(request.symbol, request.timeframe, request.marketSnapshot, request.analysisType);
 
-  const userPrompt = buildUserPrompt(
-    request.symbol,
-    request.timeframe,
-    request.marketSnapshot,
-    request.analysisType
-  );
-
-  // Build the AI request
   const aiRequest: AIAnalysisRequest = {
     prompt: userPrompt,
     systemPrompt,
@@ -130,7 +86,6 @@ export async function performAnalysis(request: AnalysisRequest): Promise<{
     temperature: 0.3,
   };
 
-  // Execute the analysis
   const response = await provider.analyze(aiRequest);
 
   logger.info('AI analysis complete', {
@@ -142,20 +97,9 @@ export async function performAnalysis(request: AnalysisRequest): Promise<{
     confidence: response.structured.confidence,
   });
 
-  return {
-    response,
-    providerUsed: provider.name,
-    providerId: provider.providerId,
-  };
+  return { response, providerUsed: provider.name, providerId: provider.providerId };
 }
 
-// ──────────────────────────────────────────────
-// Utility Functions
-// ──────────────────────────────────────────────
-
-/**
- * Get list of available providers.
- */
 export function getAvailableProviders(): Array<{
   id: AIProvider;
   name: string;
@@ -172,11 +116,6 @@ export function getAvailableProviders(): Array<{
   }));
 }
 
-/**
- * Check if any AI provider is configured.
- */
 export function hasAnyProvider(): boolean {
   return providers.some(p => p.isAvailable());
 }
-
-
