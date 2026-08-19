@@ -46,7 +46,7 @@ export async function create(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const validProviders: AIProvider[] = ['openai', 'anthropic', 'gemini'];
+    const validProviders: AIProvider[] = ['openai', 'anthropic', 'gemini', 'together', 'openrouter'];
     const selectedProvider: AIProvider = (provider && validProviders.includes(provider)) ? provider : 'openai';
 
     const validTypes: AnalysisType[] = ['data', 'vision', 'hybrid'];
