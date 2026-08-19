@@ -1,19 +1,3 @@
-/**
- * OpenRouter AI Provider
- * 
- * Uses OpenRouter's OpenAI-compatible API for market analysis.
- * OpenRouter gives access to 100+ models through a single API,
- * including FREE models (great for starting without credits!).
- * 
- * Website: https://openrouter.ai/
- * API Docs: https://openrouter.ai/docs
- * 
- * FREE models available:
- * - meta-llama/llama-3.1-70b-instruct:free
- * - mistralai/mistral-7b-instruct:free
- * - google/gemma-2-9b-it:free
- */
-
 import OpenAI from 'openai';
 import { AIProvider, AIAnalysisRequest, AIAnalysisResponse, parseAIOutput } from './ai-provider';
 import config from '@config/index';
@@ -28,8 +12,6 @@ export class OpenRouterProvider implements AIProvider {
     'meta-llama/llama-3.1-70b-instruct:free',
     'mistralai/mistral-7b-instruct:free',
     'google/gemma-2-9b-it:free',
-    'anthropic/claude-3.5-sonnet',
-    'openai/gpt-4o',
   ];
   readonly supportsVision = true;
 
@@ -38,18 +20,12 @@ export class OpenRouterProvider implements AIProvider {
   private getClient(): OpenAI {
     if (!this.client) {
       const apiKey = config.ai.openrouter?.apiKey || process.env.OPENROUTER_API_KEY || '';
-      
-      if (!apiKey) {
-        throw new Error('OpenRouter API key not configured. Set OPENROUTER_API_KEY in backend/.env');
-      }
+      if (!apiKey) throw new Error('OpenRouter API key not configured');
 
       this.client = new OpenAI({
         apiKey,
         baseURL: OPENROUTER_BASE_URL,
-        defaultHeaders: {
-          'HTTP-Referer': 'https://ai-trading-platform.vercel.app',
-          'X-Title': 'AI Trading Platform',
-        },
+        defaultHeaders: { 'HTTP-Referer': 'https://ai-trading-platform.vercel.app', 'X-Title': 'AI Trading Platform' },
       });
     }
     return this.client;
@@ -61,18 +37,13 @@ export class OpenRouterProvider implements AIProvider {
   }
 
   async analyze(request: AIAnalysisRequest): Promise<AIAnalysisResponse> {
-    if (!this.isAvailable()) {
-      throw new Error('OpenRouter API key not configured');
-    }
+    if (!this.isAvailable()) throw new Error('OpenRouter API key not configured');
 
     const client = this.getClient();
     const model = this.models[0];
-
     logger.info('OpenRouter analysis request', { model, analysisType: request.analysisType });
 
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: 'system', content: request.systemPrompt },
-    ];
+    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [{ role: 'system', content: request.systemPrompt }];
 
     if (request.chartImage && request.analysisType !== 'data') {
       messages.push({
@@ -87,10 +58,7 @@ export class OpenRouterProvider implements AIProvider {
     }
 
     const response = await client.chat.completions.create({
-      model,
-      messages,
-      max_tokens: request.maxTokens || 2000,
-      temperature: request.temperature || 0.3,
+      model, messages, max_tokens: request.maxTokens || 2000, temperature: request.temperature || 0.3,
     });
 
     const content = response.choices[0]?.message?.content || '';
@@ -98,14 +66,8 @@ export class OpenRouterProvider implements AIProvider {
     const structured = parseAIOutput(content);
 
     return {
-      reasoning: content,
-      structured,
-      model,
-      usage: {
-        promptTokens: usage?.prompt_tokens || 0,
-        completionTokens: usage?.completion_tokens || 0,
-        totalTokens: usage?.total_tokens || 0,
-      },
+      reasoning: content, structured, model,
+      usage: { promptTokens: usage?.prompt_tokens || 0, completionTokens: usage?.completion_tokens || 0, totalTokens: usage?.total_tokens || 0 },
     };
   }
 }
